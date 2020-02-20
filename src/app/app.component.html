@@ -1,0 +1,71 @@
+<section class="todoapp">
+  <header class="header">
+	<h1>todos</h1>
+	<!-- enter作为事件修饰符，用于按键抬起且回车时触发 -->
+	<input 
+	class="new-todo" 
+	placeholder="What needs to be done?" 
+	autofocus
+	(keyup.enter)="addTodo($event)">
+  </header>
+  <!-- ng-template主要用于解决，当长度判断的时不会多渲染出一层div ，没有数据时不显示下面的内容 -->
+  <ng-template [ngIf]="todos.length">
+    <!-- This section should be hidden by default and shown when there are todos -->
+    <section class="main">
+		<!-- 此处做全选反选效果且联动 
+			用属性的get set 实现
+			changge 当改变时执行
+		-->
+	  <input 
+	   id="toggle-all"
+	   class="toggle-all"
+	   type="checkbox"
+	   [checked]="toggleAll"
+	   (change)="toggleAll=$event.target.checked"
+	   >
+      <label for="toggle-all">Mark all as complete</label>
+      <ul class="todo-list">
+        <!-- These are here just to show the structure of the list items -->
+        <!-- List items should get the class `editing` when editing and `completed` when marked as completed -->
+        <!-- 
+						class
+						1.正常  没有样式
+						2.完成 completed
+						3.编辑 editing
+		-->
+		<!-- 通过 [ngClass]样式来控制它的状态	 -->
+		<!-- 原来遍历todos 现在filterTodos -->
+        <li [ngClass]="{completed: item.done,editing:currentEditing===item}" *ngFor="let item of filterTodos;let i = index">
+          <div class="view">
+			  <!-- angular中要使用双向绑定，就要引入formsmodel -->
+			<input class="toggle" type="checkbox" [(ngModel)]="item.done">
+			<!-- 双击label进入编辑模式 -->
+			<label (dblclick)="currentEditing=item">{{item.title}}</label>
+			<!-- 删除操作 -->
+            <button class="destroy" (click)=deleteTodo(i)></button>
+          </div>
+          <input class="edit" [value]="item.title" (blur)="currentEditing=null">
+		</li>
+      </ul>
+    </section>
+    <!-- This footer should hidden by default and shown when there are todos -->
+    <footer class="footer">
+      <!-- This should be `0 items left` by default -->
+      <span class="todo-count"><strong>{{unfinishedTodo}}</strong> 项未完成</span>
+      <!-- Remove this if you don't implement routing -->
+      <ul class="filters">
+		  <!-- 为了解决当点击分很多情况时，利用锚点来解决 -->
+        <li>
+          <a  [ngClass]="{selected: todoStatus==='all'}" href="#/">All</a>
+        </li>
+        <li>
+          <a [ngClass]="{selected: todoStatus==='active'}" href="#/active">Active</a>
+        </li>
+        <li>
+          <a [ngClass]="{selected: todoStatus==='completed'}" href="#/completed">Completed</a>
+        </li>
+      </ul>
+      <!-- Hidden if no completed items are left ↓ -->
+      <button class="clear-completed" (click)="clearAllDone()">清除所有已完成</button>
+    </footer>
+  </ng-template>
